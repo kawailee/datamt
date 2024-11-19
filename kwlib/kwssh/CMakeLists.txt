@@ -20,7 +20,7 @@ set(PROJ_C_FILES kwssh.c kwsshtest.c)
 #set(PROJ_C_FILES ${PROJ_C_FILES} other.c)
 
 # KL:20241005 include db/odbc/kwuty to resolve kwjson.h:21:10: fatal error: 'KwMacro.h' file not found
-set(PROJ_INCLUDE_DIRS "/home/wai/misc/workspace/db/odbc/kwuty" "/home/wai/misc/workspace/db/odbc")
+set(PROJ_INCLUDE_DIRS "$ENV{HOME}/misc/workspace/db/odbc/kwuty" "$ENV{HOME}/misc/workspace/db/odbc")
 
 project( ${PROJ_NAME} )
 include_directories( ${PROJ_INCLUDE_DIRS} )

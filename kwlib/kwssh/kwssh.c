@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <pwd.h>
 
 #include "kwssh.h"
 
@@ -1083,21 +1084,21 @@ int32_t	read_linux_password(char *pwd, size_t pwd_size, const char *prikey_path,
 	//
 	//	use openssl command to decript unix password using private key id_rsa
 	//
-	//		cat /home/wai/.ssh/id_rsa.linux.b64 | base64 -d | openssl pkeyutl -decrypt -inkey /home/wai/.ssh/id_rsa
+	//		cat ~/.ssh/id_rsa.linux.b64 | base64 -d | openssl pkeyutl -decrypt -inkey ~/.ssh/id_rsa
 	//
 	//	Extract public key from RSA private key in PEM format file: id_rsa.pub.pem seems not be able to import using openssl
 	//
-	//		ssh-keygen -f /home/wai/.ssh/id_rsa.pub -e -m pem > /home/wai/.ssh/id_rsa.pub.pem
+	//		ssh-keygen -f ~/.ssh/id_rsa.pub -e -m pem > ~/.ssh/id_rsa.pub.pem
 	//
 	//	Extract public key from RSA private key in PEM format file: id_rsa.pub.pem
 	//
-	//		openssl rsa -in /home/wai/.ssh/id_rsa -pubout -out /home/wai/.ssh/id_rsa.pub.pem
+	//		openssl rsa -in ~/.ssh/id_rsa -pubout -out ~/.ssh/id_rsa.pub.pem
 	//
 	//	openssl dgst -sha256 -sign <private-key> -out /tmp/sign.sha256 <file>
 	//
 	//	Encrypt password to : id_rsa.linux.b64 
 	//
-	//		echo "password" | openssl pkeyutl -encrypt -pubin -inkey /home/wai/.ssh/id_rsa.pub.pem -in - | base64 > /home/wai/.ssh/id_rsa.linux.b64
+	//		echo "password" | openssl pkeyutl -encrypt -pubin -inkey ~/.ssh/id_rsa.pub.pem -in - | base64 > ~/.ssh/id_rsa.linux.b64
 	//
 
 
@@ -1107,8 +1108,8 @@ int32_t	read_linux_password(char *pwd, size_t pwd_size, const char *prikey_path,
 	//		Use native openssl api call instead
 	//
 
-	//	echo "password" | openssl pkeyutl -encrypt -inkey /home/wai/.ssh/id_rsa -in - | base64 > /home/wai/.ssh/id_rsa.linux.b64.password
-	//	cat /home/wai/.ssh/id_rsa.linux.b64.password | base64 -d | openssl pkeyutl -decrypt -inkey /home/wai/.ssh/id_rsa
+	//	echo "password" | openssl pkeyutl -encrypt -inkey ~/.ssh/id_rsa -in - | base64 > ~/.ssh/id_rsa.linux.b64.password
+	//	cat ~/.ssh/id_rsa.linux.b64.password | base64 -d | openssl pkeyutl -decrypt -inkey ~/.ssh/id_rsa
 	//
 	//	const RSA *EVP_PKEY_get0_RSA(const EVP_PKEY *pkey);
 	//	int RSA_private_decrypt(int flen, const unsigned char *from, unsigned char *to, RSA *rsa, int padding);
@@ -1184,9 +1185,10 @@ int32_t	read_linux_password(char *pwd, size_t pwd_size, const char *prikey_path,
 
 	BIO *bp;
 	int32_t rc_oss = 0;
+	
 	//	int BIO_read_filename(BIO *b, char *name);
 	bp = BIO_new(BIO_s_file());
-	rc_oss = BIO_read_filename(bp, "/home/wai/.ssh/id_rsa_backup");
+	rc_oss = BIO_read_filename(bp, prikey_path);
 	if (rc_oss == 0) {
 		WARN0("BIO_read_filename() failed");
 		OSSL_LIB_CTX_free(libctx);
@@ -1304,8 +1306,8 @@ int32_t	read_linux_password(char *pwd, size_t pwd_size, const char *prikey_path,
 	OSSL_LIB_CTX_free(libctx);
 
 	//	##################################################################################
-	//	/home/wai/.ssh/id_rsa.linux.b64 | base64 -d | openssl pkeyutl -decrypt -inkey /home/wai/.ssh/id_rsa
-	//	cat /home/wai/.ssh/id_rsa.linux.b64 | base64 -d | openssl pkeyutl -decrypt -inkey /home/wai/.ssh/id_rsa_backup
+	//	~/.ssh/id_rsa.linux.b64 | base64 -d | openssl pkeyutl -decrypt -inkey ~/.ssh/id_rsa
+	//	cat ~/.ssh/id_rsa.linux.b64 | base64 -d | openssl pkeyutl -decrypt -inkey ~/.ssh/id_rsa_backup
 	#ifdef __KWSSH_USE_OPENSSL_BINARY__
 	snprintf(comstr, sizeof(comstr), "cat %s | base64 -d | openssl pkeyutl -decrypt -inkey %s", lnxkey_path, prikey_path);
 
