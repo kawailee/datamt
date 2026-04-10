@@ -1,1 +1,1 @@
-ws016 has external ip 
+ws016 has external ip 100.8.173.218
